@@ -32,13 +32,29 @@ const TaskForm = ({ onCreateTask, isLoading }: TaskFormProps) => {
 
   // Set initial deadline value when form is expanded
   const handleExpandForm = () => {
-    // Set default deadline to current time + 1 hour
-    const defaultDeadline = new Date();
-    defaultDeadline.setHours(defaultDeadline.getHours() + 1);
+    // Set default deadline to end of current day (23:59)
+    const now = new Date();
+    const defaultDeadline = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      0
+    );
+    
+    // Format the date in local timezone for the input
+    const year = defaultDeadline.getFullYear();
+    const month = String(defaultDeadline.getMonth() + 1).padStart(2, '0');
+    const day = String(defaultDeadline.getDate()).padStart(2, '0');
+    const hours = String(defaultDeadline.getHours()).padStart(2, '0');
+    const minutes = String(defaultDeadline.getMinutes()).padStart(2, '0');
+    
+    const formattedDeadline = `${year}-${month}-${day}T${hours}:${minutes}`;
     
     setNewTask({
       ...newTask,
-      deadline: defaultDeadline.toISOString().slice(0, 16)
+      deadline: formattedDeadline
     });
     
     setIsExpanded(true);

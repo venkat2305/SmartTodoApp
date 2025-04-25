@@ -38,7 +38,12 @@ export const formatDate = (dateString: string): string => {
  * Get relative time from now (e.g., "in 2 days" or "3 hours ago")
  */
 export const getRelativeTimeFromNow = (dateString: string): string => {
-  return dayjs(dateString).fromNow();
+  // When dealing with a date string without a specific timezone
+  // Create a Date object, which will be interpreted in local time
+  const date = new Date(dateString);
+  
+  // Use dayjs with the Date object to ensure consistent timezone handling
+  return dayjs(date).fromNow();
 };
 
 /**
