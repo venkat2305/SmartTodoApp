@@ -14,13 +14,11 @@ const TaskForm = ({ onCreateTask, isLoading }: TaskFormProps) => {
     deadline: '',
   });
 
-  // Set minimum date to today for deadline picker
+  // Set minimum date to current date and time for deadline picker
   const getMinDate = () => {
     const now = new Date();
     // Format: YYYY-MM-DDThh:mm
-    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
+    return now.toISOString().slice(0, 16);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,6 +28,20 @@ const TaskForm = ({ onCreateTask, isLoading }: TaskFormProps) => {
     onCreateTask(newTask.title, newTask.description, newTask.deadline);
     setNewTask({ title: '', description: '', deadline: '' });
     setIsExpanded(false);
+  };
+
+  // Set initial deadline value when form is expanded
+  const handleExpandForm = () => {
+    // Set default deadline to current time + 1 hour
+    const defaultDeadline = new Date();
+    defaultDeadline.setHours(defaultDeadline.getHours() + 1);
+    
+    setNewTask({
+      ...newTask,
+      deadline: defaultDeadline.toISOString().slice(0, 16)
+    });
+    
+    setIsExpanded(true);
   };
 
   return (
@@ -107,7 +119,7 @@ const TaskForm = ({ onCreateTask, isLoading }: TaskFormProps) => {
       
       {!isExpanded && (
         <button
-          onClick={() => setIsExpanded(true)}
+          onClick={handleExpandForm}
           className="w-full py-3 text-blue-600 hover:bg-blue-50 transition flex items-center justify-center font-medium"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

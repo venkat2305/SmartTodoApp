@@ -20,6 +20,8 @@ interface TaskContextType {
   setSearchQuery: (query: string) => void;
   createTask: (title: string, description: string, deadline: string) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
+  markTaskIncomplete: (taskId: string) => Promise<void>;
+  toggleTaskCompletion: (taskId: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   showNotification: (message: string, type: 'success' | 'error') => void;
   changeTaskStatus: (taskId: string, status: TaskStatus) => Promise<void>;
@@ -148,6 +150,51 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     }
   };
+  
+  // Mark task as incomplete (ongoing)
+  const markTaskIncomplete = async (taskId: string) => {
+    setIsLoading(true);
+    
+    try {
+      // Check if the deadline has passed
+      const task = tasks.find(t => t.id === taskId);
+      if (task && new Date(task.deadline) < new Date()) {
+        showNotification('Cannot mark as incomplete because deadline has passed', 'error');
+        setIsLoading(false);
+        return;
+      }
+      
+      const updatedTask = await api.markTaskIncomplete(taskId);
+      
+      if (updatedTask) {
+        const updatedTasks = tasks.map(task => 
+          task.id === taskId ? { ...task, status: 'ongoing', updatedAt: new Date().toISOString() } : task
+        );
+        setTasks(updatedTasks);
+        showNotification('Task marked as incomplete', 'success');
+      } else {
+        throw new Error('Failed to mark task as incomplete');
+      }
+    } catch (error) {
+      console.error('Error marking task as incomplete:', error);
+      showNotification('Failed to mark task as incomplete', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Toggle task completion status
+  const toggleTaskCompletion = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    if (task.status === 'success') {
+      await markTaskIncomplete(taskId);
+    } else if (task.status === 'ongoing') {
+      await completeTask(taskId);
+    }
+    // Do nothing if status is 'failure' as it can't be toggled directly
+  };
 
   // Delete task
   const deleteTask = async (taskId: string) => {
@@ -175,6 +222,16 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     
     try {
+      // Check if trying to set to 'ongoing' when deadline has passed
+      if (status === 'ongoing') {
+        const task = tasks.find(t => t.id === taskId);
+        if (task && new Date(task.deadline) < new Date()) {
+          showNotification('Cannot mark as ongoing because deadline has passed', 'error');
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       // Optimistically update the UI
       const updatedTasks = tasks.map(task => 
         task.id === taskId ? { ...task, status, updatedAt: new Date().toISOString() } : task
@@ -234,6 +291,8 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSearchQuery,
     createTask,
     completeTask,
+    markTaskIncomplete,
+    toggleTaskCompletion,
     deleteTask,
     showNotification,
     changeTaskStatus,

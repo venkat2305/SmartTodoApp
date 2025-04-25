@@ -1,6 +1,5 @@
-const LOCAL_API_URL = 'http://localhost:8000/api';
-const PRODUCTION_API_URL = 'https://smarttodoapp.onrender.com/api';
-const API_BASE_URL = LOCAL_API_URL;
+// Read API base URL from environment variable with fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 // API response interfaces
 interface PaginatedResponse<T> {
@@ -133,6 +132,11 @@ export const api = {
   // Mark a task as complete
   async completeTask(id: string): Promise<Task | null> {
     return this.updateTask(id, { status: 'success' });
+  },
+  
+  // Mark a task as incomplete (ongoing)
+  async markTaskIncomplete(id: string): Promise<Task | null> {
+    return this.updateTask(id, { status: 'ongoing' });
   }
 };
 

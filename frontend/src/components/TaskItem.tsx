@@ -35,6 +35,18 @@ const TaskItem = ({ task, onComplete, onDelete, onStatusChange, disabled }: Task
       onStatusChange(task.id, newStatus);
     }
   };
+  
+  // Toggle task completion
+  const toggleCompletion = () => {
+    if (task.status === 'success') {
+      // Mark as incomplete
+      handleStatusClick('ongoing');
+    } else if (task.status === 'ongoing') {
+      // Mark as complete
+      onComplete(task.id);
+    }
+    // Don't do anything for failed tasks
+  };
 
   return (
     <div 
@@ -51,17 +63,23 @@ const TaskItem = ({ task, onComplete, onDelete, onStatusChange, disabled }: Task
         <div className="space-y-2 flex-grow">
           <div className="flex items-center">
             <div 
-              className={`w-4 h-4 rounded-full mr-2 cursor-pointer
-                ${task.status === 'success' ? 'bg-green-500' : 
-                  task.status === 'failure' ? 'bg-red-500' : 'bg-blue-500'}`}
-              onClick={() => {
-                const nextStatus = 
-                  task.status === 'ongoing' ? 'success' : 
-                  task.status === 'success' ? 'failure' : 'ongoing';
-                handleStatusClick(nextStatus);
-              }}
-              title="Click to change status"
-            />
+              className={`w-5 h-5 rounded-full mr-2 cursor-pointer flex items-center justify-center
+                ${task.status === 'success' ? 'bg-green-100 border-2 border-green-500' : 
+                  task.status === 'failure' ? 'bg-red-100 border-2 border-red-500' : 'bg-white border-2 border-blue-500'}`}
+              onClick={toggleCompletion}
+              title={task.status === 'success' ? "Mark as incomplete" : "Mark as complete"}
+            >
+              {task.status === 'success' && (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+              {task.status === 'failure' && (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+            </div>
             <h3 className={`font-bold text-lg ${task.status === 'success' ? 'line-through text-gray-500' : ''}`}>
               {task.title}
             </h3>
@@ -96,16 +114,7 @@ const TaskItem = ({ task, onComplete, onDelete, onStatusChange, disabled }: Task
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
             </svg>
           </div>
-          {task.status === 'ongoing' && (
-            <button
-              onClick={() => onComplete(task.id)}
-              disabled={disabled}
-              className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition text-sm disabled:opacity-50 shadow-sm"
-              aria-label="Complete task"
-            >
-              Complete
-            </button>
-          )}
+          
           <button
             onClick={() => onDelete(task.id)}
             disabled={disabled}

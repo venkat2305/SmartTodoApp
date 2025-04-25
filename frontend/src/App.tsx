@@ -18,7 +18,7 @@ const AppContent = () => {
     setActiveTab, 
     setSearchQuery,
     createTask,
-    completeTask, 
+    toggleTaskCompletion,
     deleteTask,
     changeTaskStatus,
     reorderTasks
@@ -70,7 +70,7 @@ const AppContent = () => {
               isLoading={isLoading}
               searchQuery={searchQuery}
               activeTab={activeTab}
-              onCompleteTask={completeTask}
+              onCompleteTask={toggleTaskCompletion}
               onDeleteTask={deleteTask}
               onStatusChange={changeTaskStatus}
               onReorderTasks={reorderTasks}
