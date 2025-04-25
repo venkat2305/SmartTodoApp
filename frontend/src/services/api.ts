@@ -1,5 +1,6 @@
-// API base URL - adjust based on your Django backend location
-const API_BASE_URL = 'http://localhost:8000/api';
+const LOCAL_API_URL = 'http://localhost:8000/api';
+const PRODUCTION_API_URL = 'https://smarttodoapp.onrender.com/api';
+const API_BASE_URL = LOCAL_API_URL;
 
 // API response interfaces
 interface PaginatedResponse<T> {
