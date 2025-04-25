@@ -15,7 +15,7 @@ interface BackendTask {
   title: string;
   description: string;
   deadline: string;
-  status: 'ongoing' | 'success' | 'failure';
+  status: string; // Changed to string to match actual API response
   created_at: string;
   updated_at: string;
 }
@@ -37,7 +37,7 @@ const convertTask = (backendTask: BackendTask): Task => ({
   title: backendTask.title,
   description: backendTask.description,
   deadline: backendTask.deadline,
-  status: backendTask.status,
+  status: backendTask.status as 'ongoing' | 'success' | 'failure', // Cast to the allowed values
   createdAt: backendTask.created_at,
   updatedAt: backendTask.updated_at
 });

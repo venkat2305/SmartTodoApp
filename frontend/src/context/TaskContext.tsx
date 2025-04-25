@@ -1,35 +1,7 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import api, { Task } from '../services/api';
-
-// Define types
-type TaskStatus = 'ongoing' | 'success' | 'failure';
-
-type NotificationType = {
-  message: string;
-  type: 'success' | 'error';
-} | null;
-
-interface TaskContextType {
-  tasks: Task[];
-  filteredTasks: Task[];
-  isLoading: boolean;
-  notification: NotificationType;
-  activeTab: TaskStatus;
-  searchQuery: string;
-  setActiveTab: (tab: TaskStatus) => void;
-  setSearchQuery: (query: string) => void;
-  createTask: (title: string, description: string, deadline: string) => Promise<void>;
-  completeTask: (taskId: string) => Promise<void>;
-  markTaskIncomplete: (taskId: string) => Promise<void>;
-  toggleTaskCompletion: (taskId: string) => Promise<void>;
-  deleteTask: (taskId: string) => Promise<void>;
-  showNotification: (message: string, type: 'success' | 'error') => void;
-  changeTaskStatus: (taskId: string, status: TaskStatus) => Promise<void>;
-  reorderTasks: (reorderedTasks: Task[]) => void;
-}
-
-// Create context
-export const TaskContext = createContext<TaskContextType | undefined>(undefined);
+import { TaskContext } from './TaskContextCore';
+import type { TaskStatus, NotificationType } from './TaskContextCore';
 
 // Provider component
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -66,7 +38,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (task.status === 'ongoing') {
         const deadline = new Date(task.deadline);
         if (deadline < now) {
-          return { ...task, status: 'failure' };
+          return { ...task, status: 'failure' as const };
         }
       }
       return task;
@@ -136,7 +108,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (completedTask) {
         const updatedTasks = tasks.map(task => 
-          task.id === taskId ? { ...task, status: 'success', updatedAt: new Date().toISOString() } : task
+          task.id === taskId ? { ...task, status: 'success' as const, updatedAt: new Date().toISOString() } : task
         );
         setTasks(updatedTasks);
         showNotification('Task marked as complete', 'success');
@@ -168,7 +140,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (updatedTask) {
         const updatedTasks = tasks.map(task => 
-          task.id === taskId ? { ...task, status: 'ongoing', updatedAt: new Date().toISOString() } : task
+          task.id === taskId ? { ...task, status: 'ongoing' as const, updatedAt: new Date().toISOString() } : task
         );
         setTasks(updatedTasks);
         showNotification('Task marked as incomplete', 'success');
@@ -234,7 +206,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Optimistically update the UI
       const updatedTasks = tasks.map(task => 
-        task.id === taskId ? { ...task, status, updatedAt: new Date().toISOString() } : task
+        task.id === taskId ? { ...task, status: status as TaskStatus, updatedAt: new Date().toISOString() } : task
       );
       setTasks(updatedTasks);
       
@@ -266,6 +238,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Effect to load tasks on mount
   useEffect(() => {
     fetchTasks();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Effect to update task statuses every minute
@@ -277,10 +250,11 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, 60000);
     
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]);
 
   // Provide context value
-  const value: TaskContextType = {
+  const value = {
     tasks,
     filteredTasks,
     isLoading,
@@ -300,13 +274,4 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
-};
-
-// Custom hook for using the task context
-export const useTaskContext = () => {
-  const context = useContext(TaskContext);
-  if (context === undefined) {
-    throw new Error('useTaskContext must be used within a TaskProvider');
-  }
-  return context;
 };

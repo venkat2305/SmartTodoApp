@@ -5,7 +5,8 @@ import TaskList from './components/TaskList'
 import SearchBar from './components/SearchBar'
 import Notification from './components/Notification'
 import TaskStats from './components/TaskStats'
-import { TaskProvider, useTaskContext } from './context/TaskContext'
+import { TaskProvider } from './context/TaskContext'
+import { useTaskContext } from './context/TaskContextCore'
 
 // AppContent component uses the context
 const AppContent = () => {

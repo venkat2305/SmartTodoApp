@@ -1,12 +1,13 @@
 import React from 'react';
-import { useTaskContext } from '../context/TaskContext';
+import { useTaskContext } from '../context/TaskContextCore';
+import { Task } from '../services/api';
 
 const TaskStats: React.FC = () => {
   const { tasks } = useTaskContext();
   
-  const ongoingCount = tasks.filter(t => t.status === 'ongoing').length;
-  const completedCount = tasks.filter(t => t.status === 'success').length;
-  const failedCount = tasks.filter(t => t.status === 'failure').length;
+  const ongoingCount = tasks.filter((t: Task) => t.status === 'ongoing').length;
+  const completedCount = tasks.filter((t: Task) => t.status === 'success').length;
+  const failedCount = tasks.filter((t: Task) => t.status === 'failure').length;
   
   return (
     <div className="mt-8 pt-4 border-t text-sm text-gray-500">
